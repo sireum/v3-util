@@ -44,6 +44,9 @@ object Exec {
 
   case class StringResult(s: String, exitValue: Int) extends Result
 
+  {
+    System.setProperty("jna.nosys", "true")
+  }
 }
 
 final class Exec {
@@ -73,11 +76,11 @@ final class Exec {
           dir: Option[File], extraEnv: (String, String)*): Exec.Result = {
     import scala.collection.JavaConverters._
     val commands = new java.util.ArrayList(args.asJavaCollection)
-    val m = System.getenv()
-    for ((k, v) <- env ++ extraEnv) {
+    val m = mmapEmpty[String, String]
+    for ((k, v) <- System.getenv().asScala ++ env ++ extraEnv) {
       m.put(k, v)
     }
-    val npb = new NuProcessBuilder(commands, m)
+    val npb = new NuProcessBuilder(commands, m.asJava)
     val sb = new java.lang.StringBuilder()
     npb.setProcessListener(new NuAbstractProcessHandler {
       def append(buffer: ByteBuffer): Unit = {
