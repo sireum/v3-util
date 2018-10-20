@@ -99,11 +99,10 @@ final class Exec {
     })
     val p = npb.start()
     input match {
-      case Some(in) =>
-        p.writeStdin(ByteBuffer.wrap(in.getBytes))
-        p.closeStdin(false)
+      case Some(in) => p.writeStdin(ByteBuffer.wrap(in.getBytes))
       case _ =>
     }
+    p.closeStdin(false)
     val exitCode = p.waitFor(waitTime, TimeUnit.MILLISECONDS)
     if (exitCode != Int.MinValue) return Exec.StringResult(sb.toString, exitCode)
     if (p.isRunning) try {
