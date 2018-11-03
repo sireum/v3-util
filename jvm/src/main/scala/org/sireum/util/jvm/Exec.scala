@@ -98,7 +98,7 @@ final class Exec {
       }
     })
     val p = npb.start()
-    if (p != null) {
+    if (p != null && p.isRunning) {
       input match {
         case Some(in) => p.writeStdin(ByteBuffer.wrap(in.getBytes))
         case _ =>
