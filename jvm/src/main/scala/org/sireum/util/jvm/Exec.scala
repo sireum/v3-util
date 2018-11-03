@@ -98,23 +98,27 @@ final class Exec {
       }
     })
     val p = npb.start()
-    input match {
-      case Some(in) => p.writeStdin(ByteBuffer.wrap(in.getBytes))
-      case _ =>
-    }
-    p.closeStdin(false)
-    val exitCode = p.waitFor(waitTime, TimeUnit.MILLISECONDS)
-    if (exitCode != Int.MinValue) return Exec.StringResult(sb.toString, exitCode)
-    if (p.isRunning) try {
-      p.destroy(false)
-      p.waitFor(500, TimeUnit.MICROSECONDS)
-    } catch {
-      case _: Throwable =>
-    }
-    if (p.isRunning) try p.destroy(true) catch {
-      case _: Throwable =>
-    }
-    Exec.Timeout
+    if (p != null) {
+      input match {
+        case Some(in) => p.writeStdin(ByteBuffer.wrap(in.getBytes))
+        case _ =>
+      }
+      p.closeStdin(false)
+      val exitCode = p.waitFor(waitTime, TimeUnit.MILLISECONDS)
+      if (exitCode != Int.MinValue) return Exec.StringResult(sb.toString, exitCode)
+      if (p.isRunning) try {
+        p.destroy(false)
+        p.waitFor(500, TimeUnit.MICROSECONDS)
+      } catch {
+        case _: Throwable =>
+      }
+      if (p.isRunning)
+          try p.destroy(true)
+          catch {
+            case _: Throwable =>
+          }
+      Exec.Timeout
+    } else Exec.ExceptionRaised(new RuntimeException(s"Could not execute command: ${args.mkString(" ")}"))
   }
 
   def errorF(is: InputStream) {
