@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017, Robby, Kansas State University
+Copyright (c) 2019, Robby, Kansas State University
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -152,27 +152,27 @@ object TagJson {
       case o: Js.Obj =>
         (o.value.head._2.asInstanceOf[Js.Str].value match {
            case "ErrorMessage" =>
-             org.sireum.util.ErrorMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2))
+             org.sireum.util.ErrorMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2))
            case "FileLocationInfoErrorMessage" =>
-             org.sireum.util.FileLocationInfoErrorMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2), toInt(o.value.toList(7)._2), toInt(o.value.toList(8)._2), toStr(o.value.toList(9)._2))
+             org.sireum.util.FileLocationInfoErrorMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2), toInt(o.value.toSeq(7)._2), toInt(o.value.toSeq(8)._2), toStr(o.value.toSeq(9)._2))
            case "FileLocationInfoInfoMessage" =>
-             org.sireum.util.FileLocationInfoInfoMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2), toInt(o.value.toList(7)._2), toInt(o.value.toList(8)._2), toStr(o.value.toList(9)._2))
+             org.sireum.util.FileLocationInfoInfoMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2), toInt(o.value.toSeq(7)._2), toInt(o.value.toSeq(8)._2), toStr(o.value.toSeq(9)._2))
            case "FileLocationInfoWarningMessage" =>
-             org.sireum.util.FileLocationInfoWarningMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2), toInt(o.value.toList(7)._2), toInt(o.value.toList(8)._2), toStr(o.value.toList(9)._2))
+             org.sireum.util.FileLocationInfoWarningMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2), toInt(o.value.toSeq(7)._2), toInt(o.value.toSeq(8)._2), toStr(o.value.toSeq(9)._2))
            case "InfoMessage" =>
-             org.sireum.util.InfoMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2))
+             org.sireum.util.InfoMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2))
            case "InternalErrorMessage" =>
-             org.sireum.util.InternalErrorMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2))
+             org.sireum.util.InternalErrorMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2))
            case "LocationInfo" =>
-             org.sireum.util.LocationInfo(toInt(o.value.toList(1)._2), toInt(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2))
+             org.sireum.util.LocationInfo(toInt(o.value.toSeq(1)._2), toInt(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2))
            case "LocationInfoErrorMessage" =>
-             org.sireum.util.LocationInfoErrorMessage(toStr(o.value.toList(1)._2), toInt(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2), toInt(o.value.toList(7)._2), toStr(o.value.toList(8)._2))
+             org.sireum.util.LocationInfoErrorMessage(toStr(o.value.toSeq(1)._2), toInt(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2), toInt(o.value.toSeq(7)._2), toStr(o.value.toSeq(8)._2))
            case "LocationInfoInfoMessage" =>
-             org.sireum.util.LocationInfoInfoMessage(toStr(o.value.toList(1)._2), toInt(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2), toInt(o.value.toList(7)._2), toStr(o.value.toList(8)._2))
+             org.sireum.util.LocationInfoInfoMessage(toStr(o.value.toSeq(1)._2), toInt(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2), toInt(o.value.toSeq(7)._2), toStr(o.value.toSeq(8)._2))
            case "LocationInfoWarningMessage" =>
-             org.sireum.util.LocationInfoWarningMessage(toStr(o.value.toList(1)._2), toInt(o.value.toList(2)._2), toInt(o.value.toList(3)._2), toInt(o.value.toList(4)._2), toInt(o.value.toList(5)._2), toInt(o.value.toList(6)._2), toInt(o.value.toList(7)._2), toStr(o.value.toList(8)._2))
+             org.sireum.util.LocationInfoWarningMessage(toStr(o.value.toSeq(1)._2), toInt(o.value.toSeq(2)._2), toInt(o.value.toSeq(3)._2), toInt(o.value.toSeq(4)._2), toInt(o.value.toSeq(5)._2), toInt(o.value.toSeq(6)._2), toInt(o.value.toSeq(7)._2), toStr(o.value.toSeq(8)._2))
            case "WarningMessage" =>
-             org.sireum.util.WarningMessage(toStr(o.value.toList(1)._2), toStr(o.value.toList(2)._2))
+             org.sireum.util.WarningMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2))
          }).asInstanceOf[T]
     }
 }
