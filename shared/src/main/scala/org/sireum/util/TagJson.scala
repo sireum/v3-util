@@ -28,23 +28,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.sireum.util
 
-import upickle.Js
+
 import org.sireum.util.Json._
 
 object TagJson {
   import scala.language.implicitConversions
 
-  implicit def fromTag(o: org.sireum.util.Tag): Js.Obj =
+  implicit def fromTag(o: org.sireum.util.Tag): ujson.Obj =
     o match {
       case o: org.sireum.util.ErrorMessage =>
-        Js.Obj(
-          (".class", Js.Str("ErrorMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("ErrorMessage")),
           ("kind", fromStr(o.kind)),
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.FileLocationInfoErrorMessage =>
-        Js.Obj(
-          (".class", Js.Str("FileLocationInfoErrorMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("FileLocationInfoErrorMessage")),
           ("kind", fromStr(o.kind)),
           ("uri", fromStr(o.uri)),
           ("lineBegin", fromAnyVal(o.lineBegin)),
@@ -56,8 +56,8 @@ object TagJson {
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.FileLocationInfoInfoMessage =>
-        Js.Obj(
-          (".class", Js.Str("FileLocationInfoInfoMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("FileLocationInfoInfoMessage")),
           ("kind", fromStr(o.kind)),
           ("uri", fromStr(o.uri)),
           ("lineBegin", fromAnyVal(o.lineBegin)),
@@ -69,8 +69,8 @@ object TagJson {
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.FileLocationInfoWarningMessage =>
-        Js.Obj(
-          (".class", Js.Str("FileLocationInfoWarningMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("FileLocationInfoWarningMessage")),
           ("kind", fromStr(o.kind)),
           ("uri", fromStr(o.uri)),
           ("lineBegin", fromAnyVal(o.lineBegin)),
@@ -82,20 +82,20 @@ object TagJson {
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.InfoMessage =>
-        Js.Obj(
-          (".class", Js.Str("InfoMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("InfoMessage")),
           ("kind", fromStr(o.kind)),
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.InternalErrorMessage =>
-        Js.Obj(
-          (".class", Js.Str("InternalErrorMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("InternalErrorMessage")),
           ("kind", fromStr(o.kind)),
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.LocationInfo =>
-        Js.Obj(
-          (".class", Js.Str("LocationInfo")),
+        ujson.Obj(
+          (".class", ujson.Str("LocationInfo")),
           ("lineBegin", fromAnyVal(o.lineBegin)),
           ("columnBegin", fromAnyVal(o.columnBegin)),
           ("lineEnd", fromAnyVal(o.lineEnd)),
@@ -104,8 +104,8 @@ object TagJson {
           ("length", fromAnyVal(o.length))
         )
       case o: org.sireum.util.LocationInfoErrorMessage =>
-        Js.Obj(
-          (".class", Js.Str("LocationInfoErrorMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("LocationInfoErrorMessage")),
           ("kind", fromStr(o.kind)),
           ("lineBegin", fromAnyVal(o.lineBegin)),
           ("columnBegin", fromAnyVal(o.columnBegin)),
@@ -116,8 +116,8 @@ object TagJson {
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.LocationInfoInfoMessage =>
-        Js.Obj(
-          (".class", Js.Str("LocationInfoInfoMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("LocationInfoInfoMessage")),
           ("kind", fromStr(o.kind)),
           ("lineBegin", fromAnyVal(o.lineBegin)),
           ("columnBegin", fromAnyVal(o.columnBegin)),
@@ -128,8 +128,8 @@ object TagJson {
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.LocationInfoWarningMessage =>
-        Js.Obj(
-          (".class", Js.Str("LocationInfoWarningMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("LocationInfoWarningMessage")),
           ("kind", fromStr(o.kind)),
           ("lineBegin", fromAnyVal(o.lineBegin)),
           ("columnBegin", fromAnyVal(o.columnBegin)),
@@ -140,17 +140,17 @@ object TagJson {
           ("message", fromStr(o.message))
         )
       case o: org.sireum.util.WarningMessage =>
-        Js.Obj(
-          (".class", Js.Str("WarningMessage")),
+        ujson.Obj(
+          (".class", ujson.Str("WarningMessage")),
           ("kind", fromStr(o.kind)),
           ("message", fromStr(o.message))
         )
     }
 
-  implicit def toTag[T <: org.sireum.util.Tag](v: Js.Value): T =
+  implicit def toTag[T <: org.sireum.util.Tag](v: ujson.Value): T =
     (v: @unchecked) match {
-      case o: Js.Obj =>
-        (o.value.head._2.asInstanceOf[Js.Str].value match {
+      case o: ujson.Obj =>
+        (o.value.head._2.asInstanceOf[ujson.Str].value match {
            case "ErrorMessage" =>
              org.sireum.util.ErrorMessage(toStr(o.value.toSeq(1)._2), toStr(o.value.toSeq(2)._2))
            case "FileLocationInfoErrorMessage" =>

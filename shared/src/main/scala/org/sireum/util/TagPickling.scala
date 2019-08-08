@@ -27,8 +27,8 @@ package org.sireum.util
 
 object TagPickling {
   def pickle(tag: Tag): String =
-    upickle.json.write(TagJson.fromTag(tag))
+    ujson.write(TagJson.fromTag(tag))
 
   def unpickle[T <: Tag](s: String): T =
-    TagJson.toTag[T](upickle.json.read(s))
+    TagJson.toTag[T](ujson.read(s))
 }
