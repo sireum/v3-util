@@ -25,15 +25,35 @@
 
 package org.sireum.util
 
+import upickle.default.{macroRW, ReadWriter => RW}
+
+
 sealed trait Tag extends Product
+
+object Tag {
+  implicit def rw: RW[Tag] = RW.merge(KindTag.rw, UriTag.rw, LocationInfoTag.rw, SeverityTag.rw, MessageTag.rw)
+}
 
 sealed trait KindTag extends Tag {
   def kind: String
 }
 
+object KindTag {
+  implicit def rw: RW[KindTag] = RW.merge(FileLocationInfoErrorMessage.rw,
+    FileLocationInfoWarningMessage.rw, FileLocationInfoInfoMessage.rw, LocationInfoErrorMessage.rw,
+    LocationInfoWarningMessage.rw, LocationInfoInfoMessage.rw, InternalErrorMessage.rw, ErrorMessage.rw,
+    WarningMessage.rw, InfoMessage.rw)
+}
+
 sealed trait UriTag extends Tag {
   def uri: Uri
 }
+
+object UriTag {
+  implicit def rw: RW[UriTag] = RW.merge(FileLocationInfoErrorMessage.rw,
+    FileLocationInfoWarningMessage.rw, FileLocationInfoInfoMessage.rw)
+}
+
 
 sealed trait LocationInfoTag extends Tag {
   def lineBegin: PosInteger
@@ -127,19 +147,55 @@ sealed trait LocationInfoTag extends Tag {
     }
 }
 
+object LocationInfoTag {
+  implicit def rw: RW[LocationInfoTag] = RW.merge(FileLocationInfoErrorMessage.rw,
+    FileLocationInfoWarningMessage.rw, FileLocationInfoInfoMessage.rw, LocationInfoErrorMessage.rw,
+    LocationInfoWarningMessage.rw, LocationInfoInfoMessage.rw)
+}
+
 sealed trait SeverityTag extends Tag
+
+object SeverityTag {
+  implicit def rw: RW[SeverityTag] = RW.merge(InternalErrorTag.rw,
+    ErrorTag.rw, WarningTag.rw, InfoTag.rw)
+}
 
 sealed trait InternalErrorTag extends SeverityTag
 
+object InternalErrorTag {
+  implicit def rw: RW[InternalErrorTag] = RW.merge()
+}
+
 sealed trait ErrorTag extends SeverityTag
+
+object ErrorTag {
+  implicit def rw: RW[ErrorTag] = RW.merge(FileLocationInfoErrorMessage.rw, LocationInfoErrorMessage.rw)
+}
 
 sealed trait WarningTag extends SeverityTag
 
+object WarningTag {
+  implicit def rw: RW[WarningTag] = RW.merge(FileLocationInfoWarningMessage.rw,
+    LocationInfoWarningMessage.rw)
+}
+
 sealed trait InfoTag extends SeverityTag
+
+object InfoTag {
+  implicit def rw: RW[InfoTag] = RW.merge(FileLocationInfoInfoMessage.rw, LocationInfoInfoMessage.rw)
+}
 
 sealed trait MessageTag extends Tag {
   def message: String
 }
+
+object MessageTag {
+  implicit def rw: RW[MessageTag] = RW.merge(FileLocationInfoErrorMessage.rw,
+    FileLocationInfoWarningMessage.rw, FileLocationInfoInfoMessage.rw, LocationInfoErrorMessage.rw,
+    LocationInfoWarningMessage.rw, LocationInfoInfoMessage.rw, InternalErrorMessage.rw, ErrorMessage.rw,
+    WarningMessage.rw, InfoMessage.rw)
+}
+
 
 final case class
 LocationInfo(lineBegin: PosInteger,
@@ -149,6 +205,11 @@ LocationInfo(lineBegin: PosInteger,
              offset: Natural,
              length: Natural)
   extends LocationInfoTag
+
+object LocationInfo {
+  implicit def rw: RW[LocationInfo] = macroRW
+}
+
 
 final case class
 FileLocationInfoErrorMessage(kind: String,
@@ -165,6 +226,11 @@ FileLocationInfoErrorMessage(kind: String,
   with LocationInfoTag
   with ErrorTag
   with MessageTag
+
+object FileLocationInfoErrorMessage {
+  implicit def rw: RW[FileLocationInfoErrorMessage] = macroRW
+}
+
 
 
 final case class
@@ -183,6 +249,10 @@ FileLocationInfoWarningMessage(kind: String,
   with WarningTag
   with MessageTag
 
+object FileLocationInfoWarningMessage {
+  implicit def rw: RW[FileLocationInfoWarningMessage] = macroRW
+}
+
 
 final case class
 FileLocationInfoInfoMessage(kind: String,
@@ -200,6 +270,11 @@ FileLocationInfoInfoMessage(kind: String,
   with InfoTag
   with MessageTag
 
+object FileLocationInfoInfoMessage {
+  implicit def rw: RW[FileLocationInfoInfoMessage] = macroRW
+}
+
+
 
 final case class
 LocationInfoErrorMessage(kind: String,
@@ -214,6 +289,11 @@ LocationInfoErrorMessage(kind: String,
   with LocationInfoTag
   with ErrorTag
   with MessageTag
+
+object LocationInfoErrorMessage {
+  implicit def rw: RW[LocationInfoErrorMessage] = macroRW
+}
+
 
 
 final case class
@@ -230,6 +310,10 @@ LocationInfoWarningMessage(kind: String,
   with WarningTag
   with MessageTag
 
+object LocationInfoWarningMessage {
+  implicit def rw: RW[LocationInfoWarningMessage] = macroRW
+}
+
 
 final case class
 LocationInfoInfoMessage(kind: String,
@@ -245,6 +329,11 @@ LocationInfoInfoMessage(kind: String,
   with InfoTag
   with MessageTag
 
+object LocationInfoInfoMessage {
+  implicit def rw: RW[LocationInfoInfoMessage] = macroRW
+}
+
+
 
 final case class
 InternalErrorMessage(kind: String,
@@ -252,6 +341,11 @@ InternalErrorMessage(kind: String,
   extends InternalErrorTag
   with KindTag
   with MessageTag
+
+object InternalErrorMessage {
+  implicit def rw: RW[InternalErrorMessage] = macroRW
+}
+
 
 
 final case class
@@ -261,6 +355,10 @@ ErrorMessage(kind: String,
   with KindTag
   with MessageTag
 
+object ErrorMessage {
+  implicit def rw: RW[ErrorMessage] = macroRW
+}
+
 
 final case class
 WarningMessage(kind: String,
@@ -269,6 +367,11 @@ WarningMessage(kind: String,
   with KindTag
   with MessageTag
 
+object WarningMessage {
+  implicit def rw: RW[WarningMessage] = macroRW
+}
+
+
 
 final case class
 InfoMessage(kind: String,
@@ -276,3 +379,7 @@ InfoMessage(kind: String,
   extends InfoTag
   with KindTag
   with MessageTag
+
+object InfoMessage {
+  implicit def rw: RW[InfoMessage] = macroRW
+}
