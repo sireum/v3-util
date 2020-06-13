@@ -26,10 +26,9 @@
 package org.sireum.util.jvm
 
 import java.io._
-import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
 
-import com.zaxxer.nuprocess.{NuAbstractProcessHandler, NuProcessBuilder}
 import org.sireum.util._
 
 import scala.sys.process.ProcessIO
@@ -75,50 +74,40 @@ final class Exec {
   def run(waitTime: Long, args: Seq[String], input: Option[String],
           dir: Option[File], extraEnv: (String, String)*): Exec.Result = {
     import scala.collection.JavaConverters._
-    val commands = new java.util.ArrayList(args.asJavaCollection)
     val m = mmapEmpty[String, String]
     for ((k, v) <- System.getenv().asScala ++ env ++ extraEnv) {
       m.put(k, v)
     }
-    val npb = new NuProcessBuilder(commands, m.asJava)
-    val sb = new java.lang.StringBuilder()
-    npb.setProcessListener(new NuAbstractProcessHandler {
-      def append(buffer: ByteBuffer): Unit = {
-        val bytes = new Array[Byte](buffer.remaining)
-        buffer.get(bytes)
-        bytes.foreach(b => sb.append(b.toChar))
-      }
-
-      override def onStderr(buffer: ByteBuffer, closed: Boolean): Unit = {
-        if (!closed) append(buffer)
-      }
-
-      override def onStdout(buffer: ByteBuffer, closed: Boolean): Unit = {
-        if (!closed) append(buffer)
-      }
-    })
-    val p = npb.start()
-    if (p != null && p.isRunning) {
-      input match {
-        case Some(in) => p.writeStdin(ByteBuffer.wrap(in.getBytes))
-        case _ =>
-      }
-      p.closeStdin(false)
-      val exitCode = p.waitFor(waitTime, TimeUnit.MILLISECONDS)
-      if (exitCode != Int.MinValue) return Exec.StringResult(sb.toString, exitCode)
-      if (p.isRunning) try {
-        p.destroy(false)
-        p.waitFor(500, TimeUnit.MICROSECONDS)
+    val out = new java.io.ByteArrayOutputStream()
+    def f(baos: java.io.ByteArrayOutputStream)(bytes: Array[Byte], n: Int): Unit = {
+      baos.write(bytes, 0, n)
+    }
+    val pOut = _root_.os.ProcessOutput(f(out))
+    val stdin: _root_.os.ProcessInput = input match {
+      case Some(s) => s
+      case _ => _root_.os.Pipe
+    }
+    val sp = _root_.os.proc(args).
+      spawn(cwd = dir.map(d => _root_.os.Path(d.getCanonicalPath)).getOrElse(os.pwd),
+        env = m.toMap, stdin = stdin, stdout = pOut, stderr = pOut,
+        mergeErrIntoOut = true, propagateEnv = false)
+    val term = sp.waitFor(if (waitTime > 0) waitTime else -1)
+    if (term)
+      return Exec.StringResult(out.toString(StandardCharsets.UTF_8.name), sp.exitCode)
+    if (sp.isAlive()) {
+      try {
+        sp.destroy()
+        sp.wrapped.waitFor(500, TimeUnit.MICROSECONDS)
       } catch {
         case _: Throwable =>
       }
-      if (p.isRunning)
-          try p.destroy(true)
-          catch {
-            case _: Throwable =>
-          }
-      Exec.Timeout
-    } else Exec.ExceptionRaised(new RuntimeException(s"Could not execute command: ${args.mkString(" ")}"))
+      if (sp.isAlive)
+        try sp.destroyForcibly()
+        catch {
+          case _: Throwable =>
+        }
+    }
+    Exec.Timeout
   }
 
   def errorF(is: InputStream) {
