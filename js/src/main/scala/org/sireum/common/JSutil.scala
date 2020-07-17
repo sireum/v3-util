@@ -104,7 +104,7 @@ object JSutil {
   }
 
   def delay(n: Long): Unit = {
-    jQuery.asInstanceOf[js.Dynamic].delay(n)
+    jQuery.asInstanceOf[js.Dynamic].delay(n.toDouble)
   }
 
   def click(selector: String): Unit =
