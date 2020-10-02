@@ -28,6 +28,7 @@ package org.sireum.util
 
 import scala.annotation.StaticAnnotation
 import scala.annotation.meta.getter
+import scala.language.existentials
 
 object Json {
 
@@ -59,7 +60,7 @@ object Json {
 
   implicit final def fromSeq[T](c: CSeq[T])(
     implicit f: T => ujson.Value): ujson.Arr =
-    ujson.Arr(c.map(f): _*)
+    ujson.Arr(c.map(f).toSeq: _*)
 
   implicit final def fromTuple2[T1, T2](t: (T1, T2))(
     implicit f1: T1 => ujson.Value, f2: T2 => ujson.Value): ujson.Arr =
@@ -118,7 +119,7 @@ object Json {
     implicit f: ujson.Value => T): Option[T] =
     v match {
       case a: ujson.Arr =>
-        a.value match {
+        a.value.toSeq match {
           case Seq(value) => Some(f(value))
           case _ => None
         }
@@ -177,7 +178,7 @@ object Json {
   implicit final def toByteArray(v: ujson.Value): Array[Byte] =
     v match {
       case ujson.Str(s) =>
-        s.toString.replaceAll("[^0-9A-Fa-f]", "").sliding(2, 2).
+        s.toString.replaceAll("[^0-9A-Fa-f]", "").toSeq.sliding(2, 2).map(_.unwrap).
           toArray.map(Integer.parseInt(_, 16).toByte)
       case _ => sys.error("Unexpected ujson.Value for an Array[Byte]: " + v)
     }
@@ -199,8 +200,8 @@ object Json {
       if (a.value.isEmpty) None
       else {
         val Seq(lineBegin, columnBegin, lineEnd, columnEnd, offset, length) =
-          a.value.map(toInt)
-        Some(LocationInfo(lineBegin, columnBegin, lineEnd, columnEnd, offset, length))
+          a.value.toSeq.map(toInt)
+        Some(LocationInfo(lineBegin , columnBegin, lineEnd, columnEnd, offset, length))
       }
     case _ => sys.error("Unexpected ujson.Value for a LocationInfo: " + v)
   }

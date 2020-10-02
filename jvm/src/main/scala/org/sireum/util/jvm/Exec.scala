@@ -73,7 +73,7 @@ final class Exec {
 
   def run(waitTime: Long, args: Seq[String], input: Option[String],
           dir: Option[File], extraEnv: (String, String)*): Exec.Result = {
-    import scala.collection.JavaConverters._
+    import scala.jdk.CollectionConverters._
     val m = mmapEmpty[String, String]
     for ((k, v) <- System.getenv().asScala ++ env ++ extraEnv) {
       m.put(k, v)
@@ -93,7 +93,7 @@ final class Exec {
         mergeErrIntoOut = true, propagateEnv = false)
     val term = sp.waitFor(if (waitTime > 0) waitTime else -1)
     if (term)
-      return Exec.StringResult(out.toString(StandardCharsets.UTF_8.name), sp.exitCode)
+      return Exec.StringResult(out.toString(StandardCharsets.UTF_8.name), sp.exitCode())
     if (sp.isAlive()) {
       try {
         sp.destroy()
@@ -101,7 +101,7 @@ final class Exec {
       } catch {
         case _: Throwable =>
       }
-      if (sp.isAlive)
+      if (sp.isAlive())
         try sp.destroyForcibly()
         catch {
           case _: Throwable =>
@@ -110,7 +110,7 @@ final class Exec {
     Exec.Timeout
   }
 
-  def errorF(is: InputStream) {
+  def errorF(is: InputStream) = {
     try while (is.read != -1) {} finally is.close()
   }
 }

@@ -25,25 +25,55 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package org.sireum.util
 
+import scala.collection.mutable
+
+
 object MIdMap {
   def apply[K <: AnyRef, V](): MIdMap[K, V] = new MIdMap[K, V]
 
   def apply[K <: AnyRef, V](kvs: (K, V)*): MIdMap[K, V] = {
     val r = new MIdMap[K, V]
     for ((k, v) <- kvs) {
-      r(k) = v
+      r.put(k, v)
     }
     r
   }
 }
 
-final class MIdMap[K <: AnyRef, V] extends scala.collection.mutable.HashMap[K, V] {
-  override protected def elemEquals(key1: K, key2: K): Boolean =
-    key1 eq key2
 
-  override protected def elemHashCode(key: K): Int =
-    System.identityHashCode(key)
 
-  override def clone: MIdMap[K, V] =
-    MIdMap[K, V](this.toSeq: _*)
+final class MIdMap[K <: AnyRef, V] extends java.util.IdentityHashMap[K, V]() {
+  //
+//  override def elemEquals(key1: K, key2: K): Boolean =
+//    key1 eq key2
+//
+//  override def elemHashCode(key: K): Int =
+//    System.identityHashCode(key)
+
+  override def clone: MIdMap[K, V] = {
+    import scala.jdk.CollectionConverters._
+    val c : MIdMap[K, V] = MIdMap[K, V](this.asScala.toSeq: _*)
+    c.putAll(this)
+    c
+  }
+
+  def toMap() : mutable.Map[K, V] = {
+    import scala.jdk.CollectionConverters._
+    this.asScala
+  }
+
+  def apply(k : K) : V = {
+    this.get(k)
+  }
+
+  def getOrElseUpdate(k : K, v : V) : V = {
+    if(this.containsKey(k)) {
+      this.get(k)
+    } else {
+      this.put(k,v)
+      this.get(k)
+    }
+  }
+
+
 }

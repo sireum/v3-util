@@ -46,21 +46,21 @@ object Antlr4Util {
       val lb = stop.getLine
       val cb = stop.getCharPositionInLine
       val (le, ce) = end(lb, cb, stop.getText)
-      nodeLocMap(n) =
+      nodeLocMap.put(n,
         LocationInfo(
           offset = start.getStartIndex,
           length = stop.getStopIndex - start.getStartIndex + 1,
           lineBegin = start.getLine,
           columnBegin = start.getCharPositionInLine + 1,
           lineEnd = le,
-          columnEnd = ce)
+          columnEnd = ce))
       n
     }
 
     def at(start: Token, stop: AnyRef)(
       implicit nodeLocMap: MIdMap[AnyRef, LocationInfo]): T = {
-      val stopLi = nodeLocMap(stop)
-      nodeLocMap(n) =
+      val stopLi = nodeLocMap.get(stop)
+      nodeLocMap.put(n,
         LocationInfo(
           offset = start.getStartIndex,
           length = stopLi.offset + stopLi.length - start.getStartIndex,
@@ -68,17 +68,17 @@ object Antlr4Util {
           columnBegin = start.getCharPositionInLine + 1,
           lineEnd = stopLi.lineEnd,
           columnEnd = stopLi.columnEnd
-        )
+        ))
       n
     }
 
     def at(start: AnyRef, stop: Token)(
       implicit nodeLocMap: MIdMap[AnyRef, LocationInfo]): T = {
-      val startLi = nodeLocMap(start)
+      val startLi = nodeLocMap.get(start)
       val lb = stop.getLine
       val cb = stop.getCharPositionInLine
       val (le, ce) = end(lb, cb, stop.getText)
-      nodeLocMap(n) =
+      nodeLocMap.put(n,
         LocationInfo(
           offset = startLi.offset,
           length = stop.getStopIndex - startLi.offset + 1,
@@ -86,15 +86,15 @@ object Antlr4Util {
           columnBegin = startLi.columnBegin,
           lineEnd = le,
           columnEnd = ce
-        )
+        ))
       n
     }
 
     def at(start: AnyRef, stop: AnyRef)(
       implicit nodeLocMap: MIdMap[AnyRef, LocationInfo]): T = {
-      val startLi = nodeLocMap(start)
-      val stopLi = nodeLocMap(stop)
-      nodeLocMap(n) =
+      val startLi = nodeLocMap.get(start)
+      val stopLi = nodeLocMap.get(stop)
+      nodeLocMap.put(n,
         LocationInfo(
           offset = startLi.offset,
           length = stopLi.offset + stopLi.length - startLi.offset,
@@ -102,7 +102,7 @@ object Antlr4Util {
           columnBegin = startLi.columnBegin,
           lineEnd = stopLi.lineEnd,
           columnEnd = stopLi.columnEnd
-        )
+        ))
       n
     }
   }

@@ -108,7 +108,7 @@ object FileUtil {
     (result, file.getAbsoluteFile.toURI.toASCIIString)
   }
 
-  def walkFileTree(d: Path, f: (Boolean, Path) => Unit, isDir: Boolean) {
+  def walkFileTree(d: Path, f: (Boolean, Path) => Unit, isDir: Boolean) = {
     Files.walkFileTree(d, new SimpleFileVisitor[Path] {
       override def preVisitDirectory(
                                       d: Path, attrs: BasicFileAttributes) = {

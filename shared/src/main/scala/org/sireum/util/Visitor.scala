@@ -44,15 +44,15 @@ object Visitor {
   def map(fs : ISeq[VisitorFunction],
           parallel : Boolean = false) : VisitorFunction = {
     case x : Any =>
-      (if (parallel) fs.par else fs).
+      (if (parallel) fs else fs).
         map({ f => if (f isDefinedAt x) f(x) else true }).
         foldLeft(false)((x, y) => x || y)
   }
 
   def atMostOne(fs : ISeq[VisitorFunction],
                 parallel : Boolean = false) : VisitorFunction = {
-    case x : Any if (if (parallel) fs.par else fs).exists(_.isDefinedAt(x)) =>
-      val rs = (if (parallel) fs.par else fs).
+    case x : Any if (if (parallel) fs else fs).exists(_.isDefinedAt(x)) =>
+      val rs = (if (parallel) fs else fs).
         map({ f => if (f isDefinedAt x) (true, f(x)) else (false, false) })
       var result = false
       var found = false
@@ -68,7 +68,7 @@ object Visitor {
 
   def first(fs : ISeq[VisitorFunction],
             parallel : Boolean = false) : VisitorFunction = {
-    case x : Any if (if (parallel) fs.par else fs).exists(_.isDefinedAt(x)) =>
+    case x : Any if (if (parallel) fs else fs).exists(_.isDefinedAt(x)) =>
       val size = fs.size
       var i = 0
       var found = false
@@ -128,11 +128,11 @@ object Visitor {
     override def toString = "[" + currIndex + ", " + value.toString + "]"
   }
 
-  private[util] class TraversableStackElement(val value : scala.collection.Traversable[_])
+  private[util] class TraversableStackElement(val value : scala.collection.Iterable[_])
       extends VisitorStackElementRoot {
     var nextIndex = 0
     var curr : Any = null
-    val it = value.toIterator
+    val it = value.iterator
     def hasNext = it.hasNext
 
     def next = {
@@ -173,7 +173,7 @@ object Visitor {
 
     require(hasPre || hasPost)
 
-      def push(o : Any) {
+      def push(o : Any) = {
         o match {
           case t : scala.collection.Traversable[_] =>
             _stack = new TraversableStackElement(t) :: _stack
@@ -188,7 +188,7 @@ object Visitor {
       @inline
       def peek = _stack.head
 
-    def pop() {
+    def pop() = {
         if (hasPost && g.isDefinedAt(peek.value))
           g(peek.value)
         _stack = _stack.tail
@@ -206,7 +206,7 @@ object Visitor {
 
     var result = true
 
-      def add(n : Any) {
+      def add(n : Any) = {
         if (hasPre && f.isDefinedAt(n)) {
           if (f(n))
             push(n)

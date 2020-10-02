@@ -26,10 +26,11 @@
 package org.sireum.util
 
 import scala.annotation.tailrec
+import scala.collection.BuildFrom
 
 object Rewriter {
 
-  type ConstructorMap = IMap[String, Traversable[AnyRef] => Product with AnyRef]
+  type ConstructorMap = IMap[String, Iterable[AnyRef] => Product with AnyRef]
 
   trait HasInternalData[T] {
     def copy(other: T): Unit
@@ -97,7 +98,7 @@ object Rewriter {
 
     def makeWithNewChildren: T
 
-    def newChild(i: Int, oPrevious: Any, o: Any) {
+    def newChild(i: Int, oPrevious: Any, o: Any) = {
       isDirty = isDirty || !same(oPrevious, o)
       newChildren(i) = o.asInstanceOf[Object]
     }
@@ -112,18 +113,18 @@ object Rewriter {
   }
 
   private[util] class
-  RTraversableStackElement(value: scala.collection.Traversable[_],
+  RTraversableStackElement(value: scala.collection.Iterable[_],
                            alwaysCopy: Boolean,
                            r: Any => Any)
     extends TraversableStackElement(value)
-    with ProductStackElement[scala.collection.Traversable[_]] {
+    with ProductStackElement[scala.collection.Iterable[_]] {
     val newChildren = new Array[Object](value.size)
     var isDirty: Boolean = alwaysCopy
 
     import scala.collection.generic.CanBuildFrom
     import scala.language.higherKinds
 
-    def makeWithNewChildren: scala.collection.Traversable[_] =
+    def makeWithNewChildren: scala.collection.Iterable[_] =
       if (isDirty)
         value match {
           case _: ILinkedMap[_, _] =>
@@ -135,21 +136,21 @@ object Rewriter {
             makeHelperT(value.asInstanceOf[IVector[Any]])
           case _ =>
             makeHelperT(value.
-              asInstanceOf[scala.collection.Traversable[Any]])
+              asInstanceOf[scala.collection.Iterable[Any]])
         }
       else value
 
-    private def makeHelperT[CC[_] <: scala.collection.Traversable[Any]](t: CC[Any]) //
-                                                                       (implicit cbf: CanBuildFrom[CC[Any], Any, CC[Any]]): CC[Any] = {
-      val b = cbf(t)
+    private def makeHelperT[CC[_] <: scala.collection.Iterable[Any]](t: CC[Any]) //
+                                                                       (implicit cbf: BuildFrom[CC[Any], Any, CC[Any]]): CC[Any] = {
+      val b = cbf.newBuilder(t)
       b.sizeHint(t.size)
       b ++= newChildren
       b.result()
     }
 
     private def makeHelperM[CC[V, W] <: scala.collection.Map[V, W]](t: CC[Any, Any]) //
-                                                                   (implicit cbf: CanBuildFrom[CC[Any, Any], (Any, Any), CC[Any, Any]]): CC[Any, Any] = {
-      val b = cbf(t)
+                                                                   (implicit cbf: BuildFrom[CC[Any, Any], (Any, Any), CC[Any, Any]]): CC[Any, Any] = {
+      val b = cbf.newBuilder(t)
       b.sizeHint(t.size)
       b ++= newChildren.map(_.asInstanceOf[(Any, Any)])
       b.result()
@@ -227,7 +228,7 @@ object Rewriter {
     }
 
     def rewriter(o: Any): Any = {
-      def push(o: Any) {
+      def push(o: Any) = {
         o match {
           case t: scala.collection.Traversable[_] =>
             _stack = new RTraversableStackElement(t, alwaysCopy, rewriter) :: _stack
@@ -237,7 +238,7 @@ object Rewriter {
         }
       }
 
-      def add(n: Any) {
+      def add(n: Any) = {
         val (shouldPush, r) =
           if (hasPre && f.isDefinedAt(n)) (false, copy(n, f(n))) else (true, n)
         if (_stack.isEmpty) {

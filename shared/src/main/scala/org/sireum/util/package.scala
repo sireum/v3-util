@@ -44,7 +44,7 @@ package object util {
   type CMap[K, V] = scala.collection.Map[K, V]
   type CSet[T] = scala.collection.Set[T]
 
-  type GenSeq[T] = scala.collection.GenSeq[T]
+  type GenSeq[T] = scala.collection.Seq[T] //GenSeq
 
   type MSeq[T] = scala.collection.mutable.Seq[T]
   type MBitSet = scala.collection.mutable.BitSet
