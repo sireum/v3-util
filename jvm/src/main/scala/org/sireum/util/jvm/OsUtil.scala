@@ -31,13 +31,10 @@ object OsUtil {
   lazy val detect: OsArch.Value = {
     import OsArch._
 
-    val is64bit = Option(System.getProperty("os.arch")).getOrElse("amd64").contains("64")
-    if (is64bit) {
-      if (scala.util.Properties.isMac) Mac
-      else if (scala.util.Properties.isLinux) Linux
-      else if (scala.util.Properties.isWin) Win
-      else Unsupported
-    } else Unsupported
+    if (scala.util.Properties.isMac) Mac
+    else if (scala.util.Properties.isLinux) Linux
+    else if (scala.util.Properties.isWin) Win
+    else Unsupported
   }
 }
 
