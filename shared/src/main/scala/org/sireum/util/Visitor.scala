@@ -175,7 +175,7 @@ object Visitor {
 
       def push(o : Any) = {
         o match {
-          case t : scala.collection.Traversable[_] =>
+          case t : scala.collection.Iterable[_] =>
             _stack = new TraversableStackElement(t) :: _stack
           case p : Product =>
             _stack = new ProductStackElement(p) :: _stack

@@ -230,7 +230,7 @@ object Rewriter {
     def rewriter(o: Any): Any = {
       def push(o: Any) = {
         o match {
-          case t: scala.collection.Traversable[_] =>
+          case t: scala.collection.Iterable[_] =>
             _stack = new RTraversableStackElement(t, alwaysCopy, rewriter) :: _stack
           case v: Product with AnyRef =>
             _stack = new RProductStackElement(m, v, alwaysCopy) :: _stack
