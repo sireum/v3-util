@@ -73,27 +73,37 @@ final class Exec {
 
   def run(waitTime: Long, args: Seq[String], input: Option[String],
           dir: Option[File], extraEnv: (String, String)*): Exec.Result = {
-    var p = org.sireum.Os.proc(
-      org.sireum.ISZ((for (arg <- args) yield org.sireum.String(arg)): _*)).
-      redirectErr.standard
-    if (waitTime > 0) {
-      p = p.timeout(org.sireum.Z(waitTime))
+
+    val chunks = new java.util.concurrent.ConcurrentLinkedQueue[Either[geny.Bytes, geny.Bytes]]
+    val p = os.proc(args)
+    val cwd = dir.map(d => os.Path(d.getCanonicalPath)).orNull
+    val env = if (extraEnv.isEmpty) null else Map[String, String]() ++ extraEnv
+    val stdin = input.map(in => os.ProcessInput.makeSourceInput(in)).getOrElse(os.Pipe)
+    val timeout = if (waitTime > 0) waitTime else Long.MaxValue
+    val sub = p.spawn(
+      cwd, env,
+      stdin,
+      os.ProcessOutput.ReadBytes(
+        (buf, n) => chunks.add(Left(new geny.Bytes(java.util.Arrays.copyOf(buf, n))))
+      ),
+      os.ProcessOutput.ReadBytes(
+        (buf, n) => chunks.add(Right(new geny.Bytes(java.util.Arrays.copyOf(buf, n))))
+      ),
+      mergeErrIntoOut = true,
+      propagateEnv = true
+    )
+    import scala.jdk.CollectionConverters._
+
+    if (!sub.join(timeout)) {
+      return Exec.Timeout
     }
-    input match {
-      case Some(in) => p = p.input(in)
-      case _ =>
-    }
-    dir match {
-      case Some(d) => p = p.at(org.sireum.Os.path(d.getCanonicalPath))
-      case _ =>
-    }
-    if (extraEnv.length > 0) {
-      p = p.env(org.sireum.ISZ((for ((k, v) <- extraEnv) yield (org.sireum.String(k), org.sireum.String(v))): _*))
-    }
-    p.run() match {
-      case r: org.sireum.Os.Proc.Result.Normal => Exec.StringResult(r.out.value, r.exitCode.toInt)
-      case r: org.sireum.Os.Proc.Result.Exception => Exec.ExceptionRaised(new RuntimeException(r.err.value))
-      case r: org.sireum.Os.Proc.Result.Timeout => Exec.Timeout
+
+    val chunksArr = chunks.iterator.asScala.toSeq
+    val r = os.CommandResult(sub.exitCode(), chunksArr)
+    if (r.exitCode == 0) {
+      Exec.StringResult(r.out.text(), 0)
+    } else {
+      Exec.ExceptionRaised(new RuntimeException(r.out.text()))
     }
  }
 
