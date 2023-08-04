@@ -29,7 +29,6 @@ import java.io._
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
-import com.zaxxer.nuprocess.{NuAbstractProcessHandler, NuProcessBuilder}
 import org.sireum.util._
 
 import scala.sys.process.ProcessIO
@@ -74,53 +73,29 @@ final class Exec {
 
   def run(waitTime: Long, args: Seq[String], input: Option[String],
           dir: Option[File], extraEnv: (String, String)*): Exec.Result = {
-    import scala.jdk.CollectionConverters._
-    val commands = new java.util.ArrayList(args.asJavaCollection)
-    val m = mmapEmpty[String, String]
-    for ((k, v) <- System.getenv().asScala ++ env ++ extraEnv) {
-      m.put(k, v)
+    var p = org.sireum.Os.proc(
+      org.sireum.ISZ((for (arg <- args) yield org.sireum.String(arg)): _*)).
+      redirectErr.standard
+    if (waitTime > 0) {
+      p = p.timeout(org.sireum.Z(waitTime))
     }
-    val npb = new NuProcessBuilder(commands, m.asJava)
-    val sb = new java.lang.StringBuilder()
-    npb.setProcessListener(new NuAbstractProcessHandler {
-      def append(buffer: ByteBuffer): Unit = {
-        val bytes = new Array[Byte](buffer.remaining)
-        buffer.get(bytes)
-        bytes.foreach(b => sb.append(b.toChar))
-      }
-
-      override def onStderr(buffer: ByteBuffer, closed: Boolean): Unit = {
-        if (!closed) append(buffer)
-      }
-
-      override def onStdout(buffer: ByteBuffer, closed: Boolean): Unit = {
-        if (!closed) append(buffer)
-      }
-    })
-    val p = npb.start()
-    if (p != null && p.isRunning) {
-      input match {
-        case Some(in) => p.writeStdin(ByteBuffer.wrap(in.getBytes))
-        case _ =>
-      }
-      p.closeStdin(false)
-      val t = if (waitTime <= 0) 0 else waitTime
-      val exitCode = p.waitFor(t, TimeUnit.MILLISECONDS)
-      if (exitCode != Int.MinValue) return Exec.StringResult(sb.toString, exitCode)
-      if (p.isRunning) try {
-        p.destroy(false)
-        p.waitFor(500, TimeUnit.MICROSECONDS)
-      } catch {
-        case _: Throwable =>
-      }
-      if (p.isRunning)
-        try p.destroy(true)
-        catch {
-          case _: Throwable =>
-        }
-      Exec.Timeout
-    } else Exec.ExceptionRaised(new RuntimeException(s"Could not execute command: ${args.mkString(" ")}"))
-  }
+    input match {
+      case Some(in) => p = p.input(in)
+      case _ =>
+    }
+    dir match {
+      case Some(d) => p = p.at(org.sireum.Os.path(d.getCanonicalPath))
+      case _ =>
+    }
+    if (extraEnv.length > 0) {
+      p = p.env(org.sireum.ISZ((for ((k, v) <- extraEnv) yield (org.sireum.String(k), org.sireum.String(v))): _*))
+    }
+    p.run() match {
+      case r: org.sireum.Os.Proc.Result.Normal => Exec.StringResult(r.out.value, r.exitCode.toInt)
+      case r: org.sireum.Os.Proc.Result.Exception => Exec.ExceptionRaised(new RuntimeException(r.err.value))
+      case r: org.sireum.Os.Proc.Result.Timeout => Exec.Timeout
+    }
+ }
 
   def errorF(is: InputStream): Unit = {
     try while (is.read != -1) {} finally is.close()
